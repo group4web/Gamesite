@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <svg viewBox="0 -10S0 960 300">
+	<symbol id="s-text">
+		<text text-anchor="middle" x="50%" y="80%">BREAKOUT</text>
+	</symbol>
+
+	<g class = "g-ants">
+		<use xlink:href="#s-text" class="text-copy"></use>
+		<use xlink:href="#s-text" class="text-copy"></use>
+		<use xlink:href="#s-text" class="text-copy"></use>
+		<use xlink:href="#s-text" class="text-copy"></use>
+		<use xlink:href="#s-text" class="text-copy"></use>
+	</g>
+</svg>
+<head>
+  <meta charset="UTF-8">
+  <title>Brick Game</title>
+  <style type="text/css">
+    body { background-color: blue; }
+    canvas { border: 1px solid green; }
+      @import url(https://fonts.googleapis.com/css?family=Montserrat);
+
+html, body{
+  height: 100%;
+  font-weight: 800;
+}
+
+body{
+  background: #030321;
+  font-family: Arial;
+}
+
+svg {
+    display: block;
+    font: 10.5em 'Montserrat';
+    width: 960px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.text-copy {
+    fill: none;
+    stroke: white;
+    stroke-dasharray: 6% 29%;
+    stroke-width: 5px;
+    stroke-dashoffset: 0%;
+    animation: stroke-offset 5.5s infinite linear;
+}
+
+.text-copy:nth-child(1){
+	stroke: #4D163D;
+	animation-delay: -1;
+}
+
+.text-copy:nth-child(2){
+	stroke: #840037;
+	animation-delay: -2s;
+}
+
+.text-copy:nth-child(3){
+	stroke: #BD0034;
+	animation-delay: -3s;
+}
+
+.text-copy:nth-child(4){
+	stroke: #BD0034;
+	animation-delay: -4s;
+}
+
+.text-copy:nth-child(5){
+	stroke: #FDB731;
+	animation-delay: -5s;
+}
+
+@keyframes stroke-offset{
+	100% {stroke-dashoffset: -35%;}
+}
+  </style>
+</head>
+
+<body>
+
+    <center><canvas id="game-canvas" height="600px" width="800px"> </canvas></center>
+
+    <script type="text/javascript">
+      var canvas = document.getElementById("game-canvas"),
+          ctx = canvas.getContext("2d"),
+          ballR = 10,
+          x = canvas.width / 2,
+          y = canvas.height - 30,
+          dx = 3,
+          dy = -3,
+          pongH = 15,
+          pongW = 80,
+          pongX = (canvas.width - pongW) / 2,
+          rightKey = false,
+          leftKey = false,
+          brickRows = 3,
+          brickCol = 9,
+          brickW = 75,
+          brickH = 20,
+          brickPadding = 10,
+          brickOffsetTop = 30,
+          brickOffsetLeft = 30;
+
+      var bricks = [];
+      for (c = 0; c < brickCol; c++) {
+        for (r = 0; r < brickRows; r++) {
+          bricks.push({
+            x: (c * (brickW + brickPadding)) + brickOffsetLeft,
+            y: (r * (brickH + brickPadding)) + brickOffsetTop,
+            status: 1
+          });
+        }
+      }
+
+
+       // function to draw the ball 
+      function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballR, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+       // function draw the pong
+      function drawPong() {
+        ctx.beginPath();
+        ctx.rect(pongX, canvas.height - pongH, pongW, pongH);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+       // function draw the bricks
+      function drawBricks() {
+        bricks.forEach(function(brick) {
+          if (!brick.status) return;
+          ctx.beginPath();
+          ctx.rect(brick.x, brick.y, brickW, brickH);
+          ctx.fillStyle = "magenta";
+          ctx.fill();
+          ctx.closePath();
+        });
+      }
+
+      function collisionDetection() {
+        bricks.forEach(function(b) {
+          if (!b.status) return;
+
+          var inBricksColumn = x > b.x && x < b.x + brickW,
+              inBricksRow = y > b.y && y < b.y + brickH;
+
+          if (inBricksColumn && inBricksRow) {
+            dy = -dy;
+            b.status = 0;
+          }
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBricks();
+        drawBall();
+        drawPong();
+        collisionDetection();
+
+        if (hitSideWall())
+            dx = -dx;
+        if (hitTop() || hitPong())
+            dy = -dy;
+        if (gameOver())
+          document.location.reload();
+
+        var RIGHT_ARROW = 39,
+            LEFT_ARROW= 37;
+
+        function hitPong() { return hitBottom() && ballOverPong() }
+        function ballOverPong() { return x > pongX && x < pongX + pongW }
+        function hitBottom() { return y + dy > canvas.height - ballR }
+        function gameOver() { return hitBottom() && !ballOverPong() }
+        function hitSideWall() { return x + dx > canvas.width - ballR || x + dx < ballR }
+        function hitTop() { return y + dy < ballR }
+        function xOutOfBounds() { return x + dx > canvas.width - ballR || x + dx < ballR }
+        function rightPressed(e) { return e.keyCode == RIGHT_ARROW }
+        function leftPressed(e) { return e.keyCode == LEFT_ARROW }
+
+        function keyDown(e) {
+          rightKey = rightPressed(e); 
+          leftKey = leftPressed(e);
+        }
+
+        function keyUp(e) {
+          rightKey = rightPressed(e) ? false : rightKey;
+          leftKey = leftPressed(e) ? false : leftKey;
+        }
+
+        // Add an event listener to the keypress event.
+        document.addEventListener("keydown", keyDown, false);
+        document.addEventListener("keyup", keyUp, false);
+
+        // move the pong right if the right key pressed
+        var maxX = canvas.width - pongW,
+            minX = 0,
+            pongDelta = rightKey ? 7 : leftKey ? -7 : 0;
+
+        pongX = pongX + pongDelta;
+        pongX = Math.min(pongX, maxX);
+        pongX = Math.max(pongX, minX);
+
+        x += dx;
+        y += dy;
+      }
+
+      setInterval(draw, 10);
+    </script>
+</body>
+
+</html>
