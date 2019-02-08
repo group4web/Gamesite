@@ -48,6 +48,23 @@ var s = 10;
 var end = new Boolean;
     end = true;  
     
+    
+    
+    
+    
+    
+    
+function circle(x,y,r) {
+	ctx.beginPath();
+	ctx.arc(x, y, r, 0, Math.PI*2, true);
+	ctx.fill();
+    ctx.fillStyle = "purple";
+    if (x == rx && y == ry && s == rr){
+    end = true;
+    }
+}
+    
+    
 function circle2(x,y,r){
     ctx.beginPath();
 	ctx.arc(rx, ry, rr, 0, Math.PI*2, true);
@@ -56,15 +73,7 @@ function circle2(x,y,r){
 }
     
     
-function circle(x,y,r) {
-	ctx.beginPath();
-	ctx.arc(x, y, r, 0, Math.PI*2, true);
-	ctx.fill();
-    
-    if (x == rx && y == ry && s == rr){
-    end = true;
-    }
-}
+
 
 
 function rect(x,y,w,h) {
@@ -128,10 +137,10 @@ function draw() {
 	ctx.fillStyle = "white";
 	ctx.strokeStyle = "black";
 	rect(0,0,WIDTH,HEIGHT);
-	ctx.fillStyle = "purple";
-    circle(x, y, s);
-    //ctx.fillstyle = "red";
+    ctx.fillstyle = "maroon";
     circle2(rx,ry,rr);
+    ctx.fillStyle = "purple";
+    circle(x, y, s);
      
     if (end == true) {
         var win = new Image();
